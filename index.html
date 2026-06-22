@@ -4,73 +4,941 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Training Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
       --ink: #16140f;
-      --bone: #f5f4f1;
-      --accent: #ff5a1f;
+      --ink-2: #46413a;
       --muted: #8a857c;
-      --line: rgba(22, 20, 15, 0.14);
+      --line: rgba(22, 20, 15, 0.10);
+      --line-strong: rgba(22, 20, 15, 0.18);
+      --accent: #ff5a1f;
+      --accent-deep: #c5410f;
+      --good: #157f5f;
+      --bad: #c1432a;
+      --shadow: 0 1px 2px rgba(22,20,15,0.04), 0 8px 24px rgba(22,20,15,0.05);
+      --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+      --font-body: 'Hanken Grotesk', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bone);
+      font-family: var(--font-body);
+      background: var(--bg);
       color: var(--ink);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-      text-align: center;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    .card { max-width: 540px; }
-    .eyebrow {
-      font-size: 13px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 18px;
+
+    .app { max-width: 1000px; margin: 0 auto; padding: 28px 22px 80px; }
+
+    /* Masthead */
+    .masthead {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
     }
-    h1 {
-      font-size: clamp(36px, 8vw, 58px);
-      line-height: 1.02;
-      letter-spacing: -0.02em;
-      font-weight: 800;
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand .mark { width: 13px; height: 13px; background: var(--accent); border-radius: 3px; transform: rotate(45deg); }
+    .brand h1 {
+      font-family: var(--font-display); font-weight: 800; font-size: 26px;
+      letter-spacing: 0.01em; line-height: 1;
     }
-    p {
-      margin-top: 20px;
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.55;
+    .brand .sub { font-size: 12.5px; color: var(--muted); letter-spacing: 0.02em; margin-top: 3px; }
+    .meta-date { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); letter-spacing: 0.02em; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+    .tab {
+      appearance: none; border: 0; background: transparent; cursor: pointer;
+      font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--muted);
+      padding: 11px 14px; margin-bottom: -1px;
+      border-bottom: 2px solid transparent; transition: color .15s ease, border-color .15s ease;
     }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 30px;
-      padding: 9px 16px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      font-size: 13px;
+    .tab:hover { color: var(--ink-2); }
+    .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+    .panel[hidden] { display: none; }
+
+    /* Cards */
+    .card {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow); padding: 22px;
     }
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
+    .card + .card { margin-top: 18px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .card-title {
+      font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+    }
+
+    /* Home dashboard */
+    .home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .wcard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .wcard-weight { font-family: var(--font-display); font-weight: 800; font-size: 46px; line-height: 0.95; letter-spacing: -0.01em; }
+    .wcard-weight .u { font-size: 18px; color: var(--muted); font-weight: 600; margin-left: 4px; }
+    .wcard-sub { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+    .spark { width: 120px; height: 46px; flex: none; }
+    .wcard-actions { display: flex; gap: 9px; margin-top: 18px; flex-wrap: wrap; }
+
+    .tile-soon {
+      border: 1px dashed var(--line-strong); border-radius: 16px; padding: 22px;
+      display: flex; flex-direction: column; justify-content: center; min-height: 150px;
+      color: var(--muted); background: transparent;
+    }
+    .tile-soon .t { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+    .tile-soon p { font-size: 14px; line-height: 1.45; }
+
+    /* Hero (weight tab) */
+    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .hero-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .hero-weight { font-family: var(--font-display); font-weight: 800; font-size: clamp(54px, 12vw, 78px); line-height: 0.9; letter-spacing: -0.02em; }
+    .hero-weight .u { font-size: 0.34em; color: var(--muted); font-weight: 600; margin-left: 8px; letter-spacing: 0; }
+    .hero-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
+
+    .delta-chip {
+      display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono);
+      font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+      background: rgba(22,20,15,0.05); color: var(--ink-2);
+    }
+    .delta-chip.good { background: rgba(21,127,95,0.10); color: var(--good); }
+    .delta-chip.bad { background: rgba(193,67,42,0.10); color: var(--bad); }
+
+    .goal-line { font-family: var(--font-mono); font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+    .goal-line .to { color: var(--accent-deep); font-weight: 600; }
+
+    .unit-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; overflow: hidden; flex: none; }
+    .unit-toggle button {
+      appearance: none; border: 0; background: transparent; cursor: pointer;
+      font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: var(--muted);
+      padding: 6px 14px;
+    }
+    .unit-toggle button.active { background: var(--ink); color: var(--bg); }
+
+    /* Progress bar */
+    .progress { margin-top: 18px; }
+    .progress-track { height: 8px; background: rgba(22,20,15,0.07); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+    .progress-cap { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); margin-top: 7px; }
+
+    /* Inline goal editor */
+    .mini-edit { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+    .mini-edit input { width: 92px; }
+
+    /* Stats strip */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .stat { background: var(--surface); padding: 16px 18px; }
+    .stat .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+    .stat .v { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; }
+    .stat .v small { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .stat .v.good { color: var(--good); }
+    .stat .v.bad { color: var(--bad); }
+
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    input[type="number"], input[type="text"], input[type="date"] {
+      font-family: var(--font-mono); font-size: 15px; color: var(--ink);
+      background: var(--bg); border: 1px solid var(--line-strong); border-radius: 10px;
+      padding: 11px 12px; width: 100%;
+    }
+    input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    input::placeholder { color: var(--muted); opacity: 0.7; }
+
+    .form-msg { font-size: 13px; color: var(--bad); margin-top: 12px; min-height: 0; display: none; }
+    .form-msg.show { display: block; }
+    .form-msg.ok { color: var(--good); }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    /* Buttons */
+    .btn {
+      appearance: none; cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 600;
+      padding: 10px 18px; border-radius: 10px; border: 1px solid transparent; transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-deep); }
+    .btn-ghost { background: transparent; border-color: var(--line-strong); color: var(--ink); }
+    .btn-ghost:hover { border-color: var(--ink); }
+    .btn-small { padding: 7px 13px; font-size: 13px; }
+    .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+    /* Chart */
+    .chart-wrap { position: relative; }
+    .chart-wrap svg { width: 100%; height: auto; display: block; }
+    .grid-line { stroke: var(--line); stroke-width: 1; }
+    .axis-text { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+    .goal-stroke { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: 0.65; }
+    .goal-text { font-family: var(--font-mono); font-size: 9.5px; fill: var(--accent-deep); letter-spacing: 0.08em; }
+    .area-fill { fill: url(#areaGrad); }
+    .data-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .pt { fill: var(--surface); stroke: var(--ink); stroke-width: 2; transition: r .12s ease; }
+    .hit { fill: transparent; cursor: pointer; }
+    .hit:hover + .pt, .hit:focus-visible + .pt { r: 6; stroke: var(--accent); }
+    .hit:focus-visible { outline: none; }
+    .guide { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+
+    .chart-tip {
+      position: absolute; transform: translate(-50%, calc(-100% - 12px));
+      background: var(--ink); color: var(--bg); border-radius: 9px; padding: 8px 11px;
+      font-family: var(--font-mono); font-size: 12px; line-height: 1.4; white-space: nowrap;
+      pointer-events: none; box-shadow: 0 6px 18px rgba(22,20,15,0.22); z-index: 5;
+    }
+    .chart-tip[hidden] { display: none; }
+    .chart-tip .tw { font-weight: 600; }
+    .chart-tip .td { color: rgba(245,244,241,0.6); }
+
+    /* History */
+    .log-row { display: flex; align-items: center; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--line); }
+    .log-row:last-child { border-bottom: 0; }
+    .log-date { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); width: 58px; flex: none; }
+    .log-w { font-family: var(--font-display); font-weight: 700; font-size: 19px; width: 84px; flex: none; }
+    .log-w .u { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 2px; }
+    .log-delta { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; width: 70px; flex: none; color: var(--muted); }
+    .log-delta.good { color: var(--good); }
+    .log-delta.bad { color: var(--bad); }
+    .log-note { font-size: 13.5px; color: var(--ink-2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-actions { display: flex; gap: 4px; flex: none; }
+    .icon-btn {
+      appearance: none; border: 0; background: transparent; cursor: pointer; color: var(--muted);
+      padding: 6px; border-radius: 7px; line-height: 0; transition: color .12s ease, background .12s ease;
+    }
+    .icon-btn:hover { color: var(--ink); background: rgba(22,20,15,0.05); }
+    .icon-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+    .empty { text-align: center; padding: 34px 16px; color: var(--muted); }
+    .empty .e-title { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink-2); margin-bottom: 8px; }
+    .empty p { font-size: 14px; }
+
+    /* Footer / data */
+    .footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .footer .note { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+    .data-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .link-btn { appearance: none; border: 0; background: transparent; cursor: pointer; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); padding: 5px 8px; border-radius: 6px; }
+    .link-btn:hover { color: var(--ink); background: rgba(22,20,15,0.05); }
+    .link-btn.danger:hover { color: var(--bad); }
+
+    @media (max-width: 560px) {
+      .app { padding: 22px 16px 70px; }
+      .log-note { display: none; }
+      .log-w { width: 72px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <div class="eyebrow">Personal training log</div>
-    <h1>Building the work.</h1>
-    <p>The tracker for the four fronts &mdash; strength, conditioning, body composition, and general health &mdash; is being set up here. Live and ready soon.</p>
-    <div class="pill"><span class="dot"></span>Site connected &middot; content coming next</div>
-  </main>
+  <div class="app">
+    <header class="masthead">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <div>
+          <h1>ASCENT</h1>
+          <div class="sub">Personal training log</div>
+        </div>
+      </div>
+      <div class="meta-date" id="metaDate"></div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab active" data-tab="home" role="tab" aria-selected="true">Home</button>
+      <button class="tab" data-tab="weight" role="tab" aria-selected="false">Weight</button>
+    </nav>
+
+    <!-- HOME -->
+    <section class="panel" data-panel="home" role="tabpanel">
+      <div class="home-grid">
+        <div class="card" id="homeWeightCard">
+          <div class="card-head">
+            <span class="card-title">Weight</span>
+            <span class="card-title" id="homeEntryCount"></span>
+          </div>
+          <div id="homeWeightBody"></div>
+        </div>
+
+        <div class="tile-soon">
+          <div class="t">More coming</div>
+          <p>Workouts, weekly streak, and goal progress will get their own dashboard cards and tabs here.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WEIGHT -->
+    <section class="panel" data-panel="weight" role="tabpanel" hidden>
+      <!-- Hero -->
+      <div class="card">
+        <div class="hero-top">
+          <div>
+            <div class="hero-label">Current weight</div>
+            <div class="hero-weight" id="heroWeight">&mdash;</div>
+            <div class="hero-meta" id="heroMeta"></div>
+          </div>
+          <div class="unit-toggle" role="group" aria-label="Units">
+            <button data-unit="lb" class="active">lb</button>
+            <button data-unit="kg">kg</button>
+          </div>
+        </div>
+        <div class="progress" id="progressWrap" hidden>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-cap"><span id="progStart"></span><span id="progGoal"></span></div>
+        </div>
+      </div>
+
+      <!-- Add weigh-in -->
+      <div class="card">
+        <div class="card-head"><span class="card-title" id="formTitle">Add a weigh-in</span></div>
+        <form id="weightForm" autocomplete="off">
+          <div class="form-grid">
+            <div class="field">
+              <label for="wDate">Date</label>
+              <input type="date" id="wDate" required />
+            </div>
+            <div class="field">
+              <label for="wVal">Weight (<span class="unit-lbl">lb</span>)</label>
+              <input type="number" id="wVal" step="0.1" min="0" inputmode="decimal" placeholder="e.g. 178.5" required />
+            </div>
+            <div class="field">
+              <label for="wNote">Note (optional)</label>
+              <input type="text" id="wNote" maxlength="80" placeholder="how you felt, context&hellip;" />
+            </div>
+          </div>
+          <div class="form-msg" id="wMsg"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="wSubmit">Log weight</button>
+            <button type="button" class="btn btn-ghost" id="wCancel" hidden>Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats" id="statsStrip"></div>
+
+      <!-- Chart -->
+      <div class="card" style="margin-top:18px;">
+        <div class="card-head"><span class="card-title">Trend</span></div>
+        <div class="chart-wrap" id="chartWrap"></div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">History</span></div>
+        <div id="historyList"></div>
+      </div>
+
+      <div class="footer">
+        <span class="note" id="storageNote">Saved on this device</span>
+        <div class="data-actions">
+          <button class="link-btn" id="exportBtn">Export</button>
+          <button class="link-btn" id="importBtn">Import</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden />
+          <button class="link-btn danger" id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ---------- Storage (localStorage with in-memory fallback) ----------
+    var STORE_KEY = 'ascent.weight.v1';
+    var memoryFallback = null;
+    var storageWorks = true;
+
+    function loadState() {
+      try {
+        var raw = localStorage.getItem(STORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        storageWorks = false;
+        return memoryFallback;
+      }
+    }
+    function saveState() {
+      memoryFallback = state;
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } catch (e) {
+        storageWorks = false;
+      }
+    }
+
+    var state = loadState() || { unit: 'lb', goalLbs: null, entries: [] };
+    if (!state.entries) state.entries = [];
+    if (state.unit !== 'kg') state.unit = state.unit === 'lb' ? 'lb' : 'lb';
+
+    // ---------- Helpers ----------
+    var LB_PER_KG = 2.2046226218;
+    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function round1(n) { return Math.round(n * 10) / 10; }
+    function fmt1(n) { return round1(n).toFixed(1); }
+    function toDisplay(lbs) { return state.unit === 'kg' ? lbs / LB_PER_KG : lbs; }
+    function fromDisplay(v) { return state.unit === 'kg' ? v * LB_PER_KG : v; }
+    function u() { return state.unit; }
+
+    function uid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+    function todayISO() {
+      var d = new Date();
+      var off = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - off).toISOString().slice(0, 10);
+    }
+    function parseISO(iso) { return new Date(iso + 'T00:00:00'); }
+    function fmtDate(iso) {
+      var p = iso.split('-');
+      var label = MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10);
+      if (parseInt(p[0], 10) !== new Date().getFullYear()) label += " '" + p[0].slice(2);
+      return label;
+    }
+    function sorted() {
+      return state.entries.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    }
+    function latest() { var s = sorted(); return s.length ? s[s.length - 1] : null; }
+    function earliest() { var s = sorted(); return s.length ? s[0] : null; }
+
+    function startLbs() { var e = earliest(); return e ? e.lbs : null; }
+    function currentLbs() { var e = latest(); return e ? e.lbs : null; }
+    function totalChange() { var s = startLbs(), c = currentLbs(); return (s != null && c != null) ? c - s : null; }
+    function toGoal() { var c = currentLbs(); return (c != null && state.goalLbs != null) ? c - state.goalLbs : null; }
+
+    function losing() {
+      if (state.goalLbs != null && startLbs() != null) return state.goalLbs < startLbs();
+      return true; // default assumption: tracking toward lower weight
+    }
+    function deltaClass(changeLbs) {
+      if (changeLbs == null || Math.abs(changeLbs) < 0.05) return '';
+      var good = losing() ? changeLbs < 0 : changeLbs > 0;
+      return good ? 'good' : 'bad';
+    }
+    function arrow(changeLbs) {
+      if (changeLbs == null || Math.abs(changeLbs) < 0.05) return '';
+      return changeLbs < 0 ? '\u25BC' : '\u25B2';
+    }
+    function changeOverDays(days) {
+      var c = latest(); if (!c) return null;
+      var target = parseISO(c.date); target.setDate(target.getDate() - days);
+      var s = sorted(), ref = null;
+      for (var i = 0; i < s.length; i++) {
+        if (parseISO(s[i].date).getTime() <= target.getTime()) ref = s[i]; else break;
+      }
+      if (!ref || ref.date === c.date) return null;
+      return c.lbs - ref.lbs;
+    }
+    function progressPct() {
+      var s = startLbs(), c = currentLbs(), g = state.goalLbs;
+      if (s == null || c == null || g == null || g === s) return null;
+      var p = (c - s) / (g - s);
+      return Math.max(0, Math.min(1, p)) * 100;
+    }
+
+    function upsert(dateISO, lbs, note) {
+      var ex = null;
+      for (var i = 0; i < state.entries.length; i++) {
+        if (state.entries[i].date === dateISO) { ex = state.entries[i]; break; }
+      }
+      if (ex) { ex.lbs = lbs; ex.note = note; }
+      else state.entries.push({ id: uid(), date: dateISO, lbs: lbs, note: note });
+      saveState();
+    }
+    function removeEntry(id) {
+      state.entries = state.entries.filter(function (e) { return e.id !== id; });
+      saveState();
+    }
+
+    // ---------- Elements ----------
+    var $ = function (id) { return document.getElementById(id); };
+
+    // ---------- Render: home ----------
+    function renderHome() {
+      var count = state.entries.length;
+      $('homeEntryCount').textContent = count ? (count + (count === 1 ? ' entry' : ' entries')) : '';
+      var body = $('homeWeightBody');
+      var c = currentLbs();
+      if (c == null) {
+        body.innerHTML =
+          '<div class="empty" style="padding:18px 4px;text-align:left;">' +
+          '<div class="e-title">No weigh-ins yet</div>' +
+          '<p>Log your first weight to start tracking your trend.</p>' +
+          '</div>' +
+          '<div class="wcard-actions"><button class="btn btn-primary btn-small" data-go="log">Log weight</button></div>';
+      } else {
+        var tc = totalChange();
+        var tg = toGoal();
+        var sub = 'Since start ' + (arrow(tc) ? arrow(tc) + ' ' : '') + fmt1(Math.abs(tc != null ? tc : 0)) + ' ' + u();
+        var goalTxt = (state.goalLbs != null && tg != null)
+          ? fmt1(Math.abs(toDisplay(tg))) + ' ' + u() + ' to goal'
+          : 'No goal set';
+        body.innerHTML =
+          '<div class="wcard-top">' +
+            '<div>' +
+              '<div class="wcard-weight">' + fmt1(toDisplay(c)) + '<span class="u">' + u() + '</span></div>' +
+              '<div class="wcard-sub">' + sub + ' &middot; ' + goalTxt + '</div>' +
+            '</div>' +
+            sparkline(160) +
+          '</div>' +
+          '<div class="wcard-actions">' +
+            '<button class="btn btn-ghost btn-small" data-go="open">Open weight</button>' +
+            '<button class="btn btn-primary btn-small" data-go="log">Log weight</button>' +
+          '</div>';
+      }
+    }
+
+    function sparkline() {
+      var s = sorted();
+      if (s.length < 2) return '<svg class="spark" viewBox="0 0 120 46" aria-hidden="true"></svg>';
+      var W = 120, H = 46, pad = 5;
+      var ws = s.map(function (e) { return toDisplay(e.lbs); });
+      var lo = Math.min.apply(null, ws), hi = Math.max.apply(null, ws);
+      if (hi === lo) { hi += 1; lo -= 1; }
+      var n = s.length;
+      var pts = s.map(function (e, i) {
+        var x = pad + (i / (n - 1)) * (W - pad * 2);
+        var y = pad + (hi - toDisplay(e.lbs)) / (hi - lo) * (H - pad * 2);
+        return [x, y];
+      });
+      var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+      var last = pts[pts.length - 1];
+      return '<svg class="spark" viewBox="0 0 120 46" aria-hidden="true">' +
+        '<path d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" fill="var(--accent)"/>' +
+        '</svg>';
+    }
+
+    // ---------- Render: hero ----------
+    function renderHero() {
+      var c = currentLbs();
+      $('heroWeight').innerHTML = c == null ? '&mdash;' : fmt1(toDisplay(c)) + '<span class="u">' + u() + '</span>';
+
+      var meta = $('heroMeta');
+      var parts = [];
+      var tc = totalChange();
+      if (tc != null && Math.abs(tc) >= 0.05) {
+        parts.push('<span class="delta-chip ' + deltaClass(tc) + '">' + arrow(tc) + ' ' + fmt1(Math.abs(toDisplay(tc))) + ' ' + u() + ' since start</span>');
+      } else if (c != null) {
+        parts.push('<span class="delta-chip">First entry logged</span>');
+      }
+
+      if (state.goalLbs != null) {
+        var tg = toGoal();
+        var togo = tg != null ? fmt1(Math.abs(toDisplay(tg))) + ' ' + u() + ' to go' : '';
+        parts.push('<span class="goal-line">Goal ' + fmt1(toDisplay(state.goalLbs)) + ' ' + u() +
+          (togo ? ' &middot; <span class="to">' + togo + '</span>' : '') +
+          ' <button class="icon-btn" id="editGoalBtn" aria-label="Edit goal">' + pencilSvg() + '</button></span>');
+      } else {
+        parts.push('<span class="goal-line"><button class="btn btn-ghost btn-small" id="setGoalBtn">Set a goal</button></span>');
+      }
+      meta.innerHTML = parts.join('');
+
+      var eg = $('editGoalBtn'); if (eg) eg.addEventListener('click', openGoalEditor);
+      var sg = $('setGoalBtn'); if (sg) sg.addEventListener('click', openGoalEditor);
+
+      // progress
+      var p = progressPct();
+      var pw = $('progressWrap');
+      if (p == null) { pw.hidden = true; }
+      else {
+        pw.hidden = false;
+        $('progressFill').style.width = p.toFixed(1) + '%';
+        $('progStart').textContent = 'Start ' + fmt1(toDisplay(startLbs())) + ' ' + u();
+        $('progGoal').textContent = 'Goal ' + fmt1(toDisplay(state.goalLbs)) + ' ' + u();
+      }
+    }
+
+    function openGoalEditor() {
+      var meta = $('heroMeta');
+      var cur = state.goalLbs != null ? fmt1(toDisplay(state.goalLbs)) : '';
+      meta.innerHTML =
+        '<span class="goal-line">Goal weight (' + u() + ')</span>' +
+        '<span class="mini-edit">' +
+          '<input type="number" id="goalInput" step="0.1" min="0" inputmode="decimal" value="' + cur + '" placeholder="e.g. 160" />' +
+          '<button class="btn btn-primary btn-small" id="goalSave">Save</button>' +
+          '<button class="btn btn-ghost btn-small" id="goalCancel">Cancel</button>' +
+        '</span>';
+      var gi = $('goalInput'); gi.focus();
+      $('goalSave').addEventListener('click', function () {
+        var v = gi.value.trim();
+        if (v === '') { state.goalLbs = null; }
+        else {
+          var f = parseFloat(v);
+          if (!isFinite(f) || f <= 0) { gi.focus(); return; }
+          state.goalLbs = fromDisplay(f);
+        }
+        saveState(); render();
+      });
+      gi.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('goalSave').click(); } });
+      $('goalCancel').addEventListener('click', renderHero);
+    }
+
+    // ---------- Render: stats ----------
+    function renderStats() {
+      var strip = $('statsStrip');
+      if (!state.entries.length) { strip.innerHTML = ''; strip.style.display = 'none'; return; }
+      strip.style.display = '';
+      var s = startLbs(), tc = totalChange(), d7 = changeOverDays(7), d30 = changeOverDays(30);
+      function stat(k, valHtml) { return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + valHtml + '</div></div>'; }
+      function chg(v) {
+        if (v == null) return '<small>&mdash;</small>';
+        if (Math.abs(v) < 0.05) return '0.0 <small>' + u() + '</small>';
+        return '<span class="' + deltaClass(v) + '" style="display:inline">' + arrow(v) + ' ' + fmt1(Math.abs(toDisplay(v))) + '</span> <small>' + u() + '</small>';
+      }
+      strip.innerHTML =
+        stat('Start', fmt1(toDisplay(s)) + ' <small>' + u() + '</small>') +
+        stat('Total change', chg(tc)) +
+        stat('Last 7 days', chg(d7)) +
+        stat('Last 30 days', chg(d30)) +
+        stat('Weigh-ins', String(state.entries.length));
+    }
+
+    // ---------- Render: chart ----------
+    function renderChart() {
+      var wrap = $('chartWrap');
+      var s = sorted();
+      if (s.length === 0) {
+        wrap.innerHTML = '<div class="empty"><div class="e-title">No data yet</div><p>Log a weight or two and your trend line shows up here.</p></div>';
+        return;
+      }
+
+      var W = 720, H = 320, padL = 46, padR = 18, padT = 18, padB = 34;
+      var plotL = padL, plotR = W - padR, plotT = padT, plotB = H - padB;
+      var plotW = plotR - plotL, plotH = plotB - plotT;
+
+      var ws = s.map(function (e) { return toDisplay(e.lbs); });
+      var lo = Math.min.apply(null, ws), hi = Math.max.apply(null, ws);
+      var goalD = state.goalLbs != null ? toDisplay(state.goalLbs) : null;
+      if (goalD != null) { lo = Math.min(lo, goalD); hi = Math.max(hi, goalD); }
+      var span = hi - lo;
+      var padV = span ? span * 0.18 : 2;
+      lo -= padV; hi += padV;
+
+      var ts = s.map(function (e) { return parseISO(e.date).getTime(); });
+      var minT = Math.min.apply(null, ts), maxT = Math.max.apply(null, ts);
+
+      function xPix(t) { return maxT === minT ? (plotL + plotW / 2) : plotL + (t - minT) / (maxT - minT) * plotW; }
+      function yPix(w) { return plotT + (hi - w) / (hi - lo) * plotH; }
+
+      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Weight over time">';
+      svg += '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="var(--ink)" stop-opacity="0.10"/>' +
+        '<stop offset="100%" stop-color="var(--ink)" stop-opacity="0"/></linearGradient></defs>';
+
+      // gridlines + y labels
+      var TICKS = 4;
+      for (var i = 0; i < TICKS; i++) {
+        var yv = hi - (i / (TICKS - 1)) * (hi - lo);
+        var yp = yPix(yv);
+        svg += '<line class="grid-line" x1="' + plotL + '" y1="' + yp.toFixed(1) + '" x2="' + plotR + '" y2="' + yp.toFixed(1) + '"/>';
+        svg += '<text class="axis-text" x="' + (plotL - 8) + '" y="' + (yp + 3).toFixed(1) + '" text-anchor="end">' + fmt1(yv) + '</text>';
+      }
+
+      // goal line
+      if (goalD != null) {
+        var gy = yPix(goalD);
+        svg += '<line class="goal-stroke" x1="' + plotL + '" y1="' + gy.toFixed(1) + '" x2="' + plotR + '" y2="' + gy.toFixed(1) + '"/>';
+        svg += '<text class="goal-text" x="' + plotR + '" y="' + (gy - 5).toFixed(1) + '" text-anchor="end">GOAL ' + fmt1(goalD) + '</text>';
+      }
+
+      // points
+      var pts = s.map(function (e) { return [xPix(parseISO(e.date).getTime()), yPix(toDisplay(e.lbs))]; });
+
+      // area + line (need >=2 points)
+      if (pts.length >= 2) {
+        var lineD = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+        var areaD = 'M' + pts[0][0].toFixed(1) + ' ' + plotB + ' ' +
+          pts.map(function (p) { return 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ') +
+          ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + plotB + ' Z';
+        svg += '<path class="area-fill" d="' + areaD + '"/>';
+        svg += '<path class="data-line" d="' + lineD + '"/>';
+      }
+
+      // x labels
+      function xlabel(idx, anchor) {
+        var p = pts[idx];
+        svg += '<text class="axis-text" x="' + p[0].toFixed(1) + '" y="' + (H - 12) + '" text-anchor="' + anchor + '">' + fmtDate(s[idx].date) + '</text>';
+      }
+      if (s.length === 1) { xlabel(0, 'middle'); }
+      else {
+        xlabel(0, 'start');
+        if (s.length >= 3) xlabel(Math.floor((s.length - 1) / 2), 'middle');
+        xlabel(s.length - 1, 'end');
+      }
+
+      // guide line (hidden, moved on hover)
+      svg += '<line class="guide" id="chartGuide" x1="0" y1="' + plotT + '" x2="0" y2="' + plotB + '"/>';
+
+      // points + hit targets
+      var deltas = s.map(function (e, i) { return i === 0 ? null : s[i].lbs - s[i - 1].lbs; });
+      for (var j = 0; j < pts.length; j++) {
+        var px = pts[j][0], py = pts[j][1];
+        var dtxt = deltas[j] == null ? '' : (arrow(deltas[j]) + ' ' + fmt1(Math.abs(toDisplay(deltas[j]))) + ' ' + u());
+        svg += '<circle class="hit" cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="14" tabindex="0" ' +
+          'data-x="' + px.toFixed(1) + '" data-y="' + py.toFixed(1) + '" ' +
+          'data-w="' + fmt1(toDisplay(s[j].lbs)) + '" data-date="' + fmtDate(s[j].date) + '" data-d="' + dtxt + '"></circle>';
+        svg += '<circle class="pt" cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="3.5" pointer-events="none"></circle>';
+      }
+
+      svg += '</svg><div class="chart-tip" id="chartTip" hidden></div>';
+      wrap.innerHTML = svg;
+      wireChart(wrap, W, H);
+    }
+
+    function wireChart(wrap, W, H) {
+      var svgEl = wrap.querySelector('svg');
+      var tip = wrap.querySelector('#chartTip');
+      var guide = wrap.querySelector('#chartGuide');
+      var hits = wrap.querySelectorAll('.hit');
+
+      function show(el) {
+        var x = parseFloat(el.getAttribute('data-x'));
+        var y = parseFloat(el.getAttribute('data-y'));
+        var w = el.getAttribute('data-w');
+        var date = el.getAttribute('data-date');
+        var d = el.getAttribute('data-d');
+        var box = svgEl.getBoundingClientRect();
+        var leftPx = (x / W) * box.width;
+        var topPx = (y / H) * box.height;
+        tip.innerHTML = '<span class="tw">' + w + ' ' + u() + '</span><br><span class="td">' + date + (d ? ' &middot; ' + d : '') + '</span>';
+        tip.style.left = leftPx + 'px';
+        tip.style.top = topPx + 'px';
+        tip.hidden = false;
+        if (guide) { guide.setAttribute('x1', x); guide.setAttribute('x2', x); guide.style.opacity = '1'; }
+      }
+      function hide() { tip.hidden = true; if (guide) guide.style.opacity = '0'; }
+
+      for (var i = 0; i < hits.length; i++) {
+        hits[i].addEventListener('mouseenter', function (e) { show(e.currentTarget); });
+        hits[i].addEventListener('focus', function (e) { show(e.currentTarget); });
+        hits[i].addEventListener('mouseleave', hide);
+        hits[i].addEventListener('blur', hide);
+      }
+      svgEl.addEventListener('mouseleave', hide);
+    }
+
+    // ---------- Render: history ----------
+    function renderHistory() {
+      var list = $('historyList');
+      if (!state.entries.length) {
+        list.innerHTML = '<div class="empty"><div class="e-title">No entries yet</div><p>Your logged weigh-ins will appear here, newest first.</p></div>';
+        return;
+      }
+      var asc = sorted();
+      var deltas = {};
+      for (var i = 0; i < asc.length; i++) deltas[asc[i].id] = i === 0 ? null : asc[i].lbs - asc[i - 1].lbs;
+
+      var rows = asc.slice().reverse().map(function (e) {
+        var d = deltas[e.id];
+        var dHtml = d == null ? '&mdash;' : (arrow(d) + ' ' + fmt1(Math.abs(toDisplay(d))));
+        var dClass = d == null ? '' : deltaClass(d);
+        var note = e.note ? escapeHtml(e.note) : '';
+        return '<div class="log-row">' +
+          '<div class="log-date">' + fmtDate(e.date) + '</div>' +
+          '<div class="log-w">' + fmt1(toDisplay(e.lbs)) + '<span class="u">' + u() + '</span></div>' +
+          '<div class="log-delta ' + dClass + '">' + dHtml + '</div>' +
+          '<div class="log-note" title="' + note + '">' + note + '</div>' +
+          '<div class="row-actions">' +
+            '<button class="icon-btn" data-edit="' + e.id + '" aria-label="Edit entry">' + pencilSvg() + '</button>' +
+            '<button class="icon-btn" data-del="' + e.id + '" aria-label="Delete entry">' + trashSvg() + '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      list.innerHTML = rows;
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function pencilSvg() {
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+    }
+    function trashSvg() {
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+    }
+
+    // ---------- Master render ----------
+    function render() {
+      renderHome();
+      renderHero();
+      renderStats();
+      renderChart();
+      renderHistory();
+      document.querySelectorAll('.unit-lbl').forEach(function (el) { el.textContent = u(); });
+      document.querySelectorAll('.unit-toggle button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-unit') === u());
+      });
+      $('storageNote').textContent = storageWorks ? 'Saved on this device' : 'Preview mode \u2014 saving is disabled here, but works once deployed';
+    }
+
+    // ---------- Form handling ----------
+    var editingId = null;
+    var form = $('weightForm');
+    var msg = $('wMsg');
+
+    function showMsg(text, ok) {
+      msg.textContent = text;
+      msg.className = 'form-msg show' + (ok ? ' ok' : '');
+      if (ok) setTimeout(function () { msg.className = 'form-msg'; }, 2200);
+    }
+    function resetForm() {
+      editingId = null;
+      form.reset();
+      $('wDate').value = todayISO();
+      $('formTitle').textContent = 'Add a weigh-in';
+      $('wSubmit').textContent = 'Log weight';
+      $('wCancel').hidden = true;
+      msg.className = 'form-msg';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var dateISO = $('wDate').value;
+      var raw = parseFloat($('wVal').value);
+      var note = $('wNote').value.trim();
+
+      if (!dateISO) { showMsg('Pick a date for this weigh-in.'); return; }
+      if (!isFinite(raw) || raw <= 0) { showMsg('Enter a weight above 0.'); return; }
+      var cap = u() === 'kg' ? 700 : 1500;
+      if (raw > cap) { showMsg('That weight looks too high \u2014 check the number.'); return; }
+
+      var lbs = fromDisplay(raw);
+
+      if (editingId) {
+        // if the date moved off the original, drop the original first
+        var orig = null;
+        for (var i = 0; i < state.entries.length; i++) if (state.entries[i].id === editingId) { orig = state.entries[i]; break; }
+        if (orig && orig.date !== dateISO) removeEntry(editingId);
+        editingId = null;
+      }
+      upsert(dateISO, lbs, note);
+      resetForm();
+      render();
+      showMsg('Saved.', true);
+    });
+
+    $('wCancel').addEventListener('click', resetForm);
+
+    function startEdit(id) {
+      var e = null;
+      for (var i = 0; i < state.entries.length; i++) if (state.entries[i].id === id) { e = state.entries[i]; break; }
+      if (!e) return;
+      editingId = id;
+      $('wDate').value = e.date;
+      $('wVal').value = fmt1(toDisplay(e.lbs));
+      $('wNote').value = e.note || '';
+      $('formTitle').textContent = 'Edit weigh-in';
+      $('wSubmit').textContent = 'Update entry';
+      $('wCancel').hidden = false;
+      msg.className = 'form-msg';
+      $('wVal').focus();
+      document.querySelector('[data-panel="weight"]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---------- Delegated clicks (history + home) ----------
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-edit],[data-del],[data-go]') : null;
+      if (!t) return;
+      if (t.hasAttribute('data-edit')) startEdit(t.getAttribute('data-edit'));
+      else if (t.hasAttribute('data-del')) {
+        if (confirm('Delete this weigh-in? This cannot be undone.')) { removeEntry(t.getAttribute('data-del')); render(); }
+      } else if (t.hasAttribute('data-go')) {
+        switchTab('weight');
+        if (t.getAttribute('data-go') === 'log') { $('wDate').value = todayISO(); $('wVal').focus(); }
+      }
+    });
+
+    // ---------- Unit toggle ----------
+    document.querySelectorAll('.unit-toggle button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var nu = b.getAttribute('data-unit');
+        if (nu === state.unit) return;
+        // if mid-edit, convert the input value to the new unit for continuity
+        if (editingId || $('wVal').value) {
+          var cur = parseFloat($('wVal').value);
+          if (isFinite(cur)) {
+            var lbs = state.unit === 'kg' ? cur * LB_PER_KG : cur;
+            state.unit = nu;
+            $('wVal').value = fmt1(state.unit === 'kg' ? lbs / LB_PER_KG : lbs);
+          } else { state.unit = nu; }
+        } else { state.unit = nu; }
+        saveState();
+        render();
+      });
+    });
+
+    // ---------- Tabs ----------
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(function (b) {
+        var on = b.getAttribute('data-tab') === name;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.panel').forEach(function (p) {
+        p.hidden = p.getAttribute('data-panel') !== name;
+      });
+    }
+    document.querySelectorAll('.tab').forEach(function (b) {
+      b.addEventListener('click', function () { switchTab(b.getAttribute('data-tab')); });
+    });
+
+    // ---------- Data management ----------
+    $('exportBtn').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'training-log-weight.json'; a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    });
+    $('importBtn').addEventListener('click', function () { $('importFile').click(); });
+    $('importFile').addEventListener('change', function (e) {
+      var file = e.target.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(reader.result);
+          if (!data || !Array.isArray(data.entries)) throw new Error('bad shape');
+          state = {
+            unit: data.unit === 'kg' ? 'kg' : 'lb',
+            goalLbs: typeof data.goalLbs === 'number' ? data.goalLbs : null,
+            entries: data.entries.filter(function (x) { return x && typeof x.lbs === 'number' && x.date; })
+              .map(function (x) { return { id: x.id || uid(), date: x.date, lbs: x.lbs, note: x.note || '' }; })
+          };
+          saveState(); resetForm(); render();
+          showMsg('Imported ' + state.entries.length + ' entries.', true);
+          switchTab('weight');
+        } catch (err) {
+          alert('That file could not be read as a valid export.');
+        }
+        $('importFile').value = '';
+      };
+      reader.readAsText(file);
+    });
+    $('resetBtn').addEventListener('click', function () {
+      if (confirm('Delete all weigh-ins and your goal? This cannot be undone.')) {
+        state = { unit: state.unit, goalLbs: null, entries: [] };
+        saveState(); resetForm(); render();
+      }
+    });
+
+    // ---------- Init ----------
+    (function initDate() {
+      var d = new Date();
+      $('metaDate').textContent = MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      $('wDate').value = todayISO();
+    })();
+    render();
+  })();
+  </script>
 </body>
 </html>
