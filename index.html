@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Log</title>
+  <style>
+    :root {
+      --ink: #16140f;
+      --bone: #f5f4f1;
+      --accent: #ff5a1f;
+      --muted: #8a857c;
+      --line: rgba(22, 20, 15, 0.14);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bone);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card { max-width: 540px; }
+    .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-size: clamp(36px, 8vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    p {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 30px;
+      padding: 9px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 13px;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">Personal training log</div>
+    <h1>Building the work.</h1>
+    <p>The tracker for the four fronts &mdash; strength, conditioning, body composition, and general health &mdash; is being set up here. Live and ready soon.</p>
+    <div class="pill"><span class="dot"></span>Site connected &middot; content coming next</div>
+  </main>
+</body>
+</html>
